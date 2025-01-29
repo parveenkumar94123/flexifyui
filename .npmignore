@@ -1,0 +1,18 @@
+# Ignore build files
+dist/
+
+# Ignore test files
+test/
+tests/
+
+# Ignore source files
+src/
+
+# Ignore config files
+.gitignore
+.editorconfig
+tsconfig.json
+
+# Ignore license and readme if necessary (optional)
+README.md
+LICENSE

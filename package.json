@@ -1,0 +1,36 @@
+{
+  "name": "flexifyui",
+  "version": "1.0.0",
+  "main": "index.js",
+  "scripts": {
+    "build": "tsc",
+    "build:css": "postcss src/styles/tailwind.css -o src/styles/output.css",
+    "dev": "npm run build:css && tsc --watch",
+    "clean": "rm -rf dist",
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "type": "commonjs",
+  "description": "",
+  "peerDependencies": {
+    "react": ">=15.0.0",
+    "react-dom": ">=15.0.0",
+    "next": ">=13.0.0"
+  },
+  "dependencies": {
+    "react": "^19.0.0",
+    "react-dom": "^19.0.0"
+  },
+  "devDependencies": {
+    "@types/node": "^22.12.0",
+    "@types/react": "^19.0.8",
+    "@types/react-dom": "^19.0.3",
+    "autoprefixer": "^10.4.20",
+    "postcss": "^8.5.1",
+    "postcss-cli": "^11.0.0",
+    "tailwindcss": "^4.0.0",
+    "typescript": "^5.7.3"
+  }
+}
