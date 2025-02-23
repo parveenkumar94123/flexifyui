@@ -33,16 +33,14 @@ jobs:
         continue-on-error: true
         run: npm view flexifyui@$VERSION
 
-      - name: Unpublish existing version (if exists)
-        if: steps.check_version.outcome == 'success'
-        run: npm unpublish flexifyui@$VERSION --force
-
-      - name: Bump version automatically
+      - name: Bump version automatically (if version exists)
+        if: steps.check_version.outcome == 'success'  # Only bump if the version exists
         run: |
           npm version patch -m "chore(release): Bump version to %s"
           echo "NEW_VERSION=$(node -p "require('./package.json').version")" >> $GITHUB_ENV
 
-      - name: Push updated package.json and tag
+      - name: Push updated package.json and tag (if version bumped)
+        if: steps.check_version.outcome == 'success'  # Only push if version was bumped
         run: |
           git config --global user.name "github-actions[bot]"
           git config --global user.email "github-actions[bot]@users.noreply.github.com"
