@@ -1,1 +1,1 @@
-export * from './v';
+export {default} from './v';

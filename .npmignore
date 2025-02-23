@@ -1,18 +1,31 @@
-# Ignore build files
-dist/
+# Exclude JetBrains IDE files
+.idea/
+
+# Exclude configuration files
+postcss.config.js
+tailwind.config.js
+tsconfig.json
 
 # Ignore test files
-test/
 tests/
 
 # Ignore source files
 src/
 
-# Ignore config files
-.gitignore
-.editorconfig
-tsconfig.json
-
 # Ignore license and readme if necessary (optional)
 README.md
 LICENSE
+
+# Exclude Git metadata
+.github/
+.git/
+.gitignore
+
+# Logs and dependency directories
+node_modules/
+
+# Local environment files
+.env
+
+# Ignore package-lock.json (optional, if you don't want it in the package)
+package-lock.json
