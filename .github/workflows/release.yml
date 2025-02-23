@@ -1,4 +1,4 @@
-name: Publish Stable Release
+name: Release
 
 on:
   push:
@@ -36,14 +36,13 @@ jobs:
       - name: Bump version automatically (if version exists)
         if: steps.check_version.outcome == 'success'  # Only bump if the version exists
         run: |
+          git config --global user.name "github-actions[bot]"
+          git config --global user.email "github-actions[bot]@users.noreply.github.com"
           npm version patch -m "chore(release): Bump version to %s"
           echo "NEW_VERSION=$(node -p "require('./package.json').version")" >> $GITHUB_ENV
 
-      - name: Push updated package.json and tag (if version bumped)
-        if: steps.check_version.outcome == 'success'  # Only push if version was bumped
+      - name: Push updated package.json and tag
         run: |
-          git config --global user.name "github-actions[bot]"
-          git config --global user.email "github-actions[bot]@users.noreply.github.com"
           git add package.json
           git commit -m "chore(release): Bump version to $NEW_VERSION"
           git tag v$NEW_VERSION
