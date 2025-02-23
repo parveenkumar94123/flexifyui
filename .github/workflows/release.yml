@@ -54,6 +54,7 @@ jobs:
           else
             echo "Tag v${{ env.NEW_VERSION }} does not exist."
             echo "TAG_EXISTS=false" >> $GITHUB_ENV
+          fi  # Closing the if block properly
 
       - name: Push updated package.json and tag
         run: |
