@@ -53,10 +53,13 @@ jobs:
             echo "Tag v${{ env.NEW_VERSION }} does not exist."
             echo "TAG_EXISTS=false" >> $GITHUB_ENV
 
+      - name: Configure Git user
+        run: |
+          git config --global user.name "parveenkumar94123"
+          git config --global user.email "parveenkumar94123@gmail.com"
+
       - name: Push updated package.json and tag
         run: |
-          git config --global user.name "github-actions[bot]"
-          git config --global user.email "github-actions[bot]@users.noreply.github.com"
           git add package.json
           git commit -m "chore(release): Bump version to $NEW_VERSION" || echo "No changes to commit"
           if [ "${{ env.TAG_EXISTS }}" == "false" ]; then
