@@ -1,0 +1,73 @@
+name: Publish Stable Release
+
+on:
+  push:
+    branches:
+      - main
+
+jobs:
+  release:
+    if: github.repository_owner == 'parveenkumar94123'  # ✅ Only run for your repository
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v3
+        with:
+          fetch-depth: 0  # Ensure we fetch all tags
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v3
+        with:
+          node-version: '18'
+          registry-url: 'https://registry.npmjs.org/'
+
+      - name: Install dependencies
+        run: npm install
+
+      - name: Get current version
+        id: package
+        run: echo "VERSION=$(node -p "require('./package.json').version")" >> $GITHUB_ENV
+
+      - name: Check if version already exists
+        id: check_version
+        continue-on-error: true
+        run: npm view flexifyui@$VERSION
+
+      - name: Unpublish existing version (if exists)
+        if: steps.check_version.outcome == 'success'
+        run: npm unpublish flexifyui@$VERSION --force
+
+      - name: Bump version automatically
+        run: |
+          npm version patch -m "chore(release): Bump version to %s"
+          echo "NEW_VERSION=$(node -p "require('./package.json').version")" >> $GITHUB_ENV
+
+      - name: Push updated package.json and tag
+        run: |
+          git config --global user.name "github-actions[bot]"
+          git config --global user.email "github-actions[bot]@users.noreply.github.com"
+          git add package.json
+          git commit -m "chore(release): Bump version to $NEW_VERSION"
+          git tag v$NEW_VERSION
+          git push origin main --tags
+
+      - name: Authenticate with npm
+        run: echo "//registry.npmjs.org/:_authToken=${{ secrets.NPM_TOKEN }}" > ~/.npmrc
+
+      - name: Publish to NPM (latest)
+        run: npm publish --access public
+        env:
+          NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
+
+      # ✅ Create GitHub Release after successful NPM publish
+      - name: Create GitHub Release
+        uses: softprops/action-gh-release@v1
+        with:
+          repository: "parveenkumar94123/flexifyui"
+          tag_name: v${{ env.NEW_VERSION }}
+          name: Release v${{ env.NEW_VERSION }}
+          body: "Automated release for version ${{ env.NEW_VERSION }}"
+          draft: false
+          prerelease: false
+        env:
+          GITHUB_TOKEN: ${{ secrets.GIT_TOKEN }}  # ✅ Use your custom secret (GIT_TOKEN)

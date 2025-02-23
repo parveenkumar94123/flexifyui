@@ -1,0 +1,61 @@
+{
+  "name": "flexifyui",
+  "version": "1.0.0",
+  "main": "dist/index.js",
+  "module": "dist/index.js",
+  "types": "dist/index.d.ts",
+  "exports": {
+    ".": {
+      "import": "./dist/index.js",
+      "types": "./dist/index.d.ts"
+    },
+    "./validator": {
+      "import": "./dist/validator/v.js",
+      "types": "./dist/validator/v.d.ts"
+    },
+    "./ui": {
+      "import": "./dist/ui/index.js",
+      "types": "./dist/ui/index.d.ts"
+    }
+  },
+  "scripts": {
+    "clean": "rm -rf dist",
+    "build": "tsc"
+  },
+  "keywords": [
+    "react",
+    "nextjs",
+    "ui",
+    "components",
+    "validation",
+    "typescript",
+    "form-validation",
+    "tailwindcss",
+    "design-system",
+    "flexifyui"
+  ],
+  "author": "Parveen Kumar",
+  "license": "ISC",
+  "type": "commonjs",
+  "description": "FlexifyUI is a flexible UI and validation library for Next.js and React, supporting TypeScript and TailwindCSS.",
+  "peerDependencies": {
+    "next": ">=13.0.0",
+    "react": ">=15.0.0",
+    "react-dom": ">=15.0.0"
+  },
+  "dependencies": {
+    "date-fns": "^4.1.0",
+    "react": ">=15.0.0",
+    "react-dom": ">=15.0.0"
+  },
+  "devDependencies": {
+    "@types/node": "^22.12.0",
+    "@types/react": "^19.0.8",
+    "@types/react-dom": "^19.0.3",
+    "autoprefixer": "^10.4.20",
+    "postcss": "^8.5.1",
+    "postcss-cli": "^11.0.0",
+    "tailwindcss": "^4.0.0",
+    "typescript": "^5.7.3"
+  }
+}
