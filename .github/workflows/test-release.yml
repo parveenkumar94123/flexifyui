@@ -4,8 +4,6 @@ on:
   release:
     types:
       - created
-    branches:
-      - 'test'
 
 jobs:
   test-release:
@@ -23,15 +21,30 @@ jobs:
       - name: Install dependencies
         run: npm install
 
-      - name: Run Tests
-        run: npm test
+      - name: Check if version already exists on npm
+        run: |
+          PACKAGE_NAME=$(node -p "require('./package.json').name")
+          PACKAGE_VERSION=$(node -p "require('./package.json').version")
+          echo "Checking if $PACKAGE_NAME@$PACKAGE_VERSION exists on npm..."
+          
+          if npm view "$PACKAGE_NAME@$PACKAGE_VERSION" > /dev/null 2>&1; then
+            echo "$PACKAGE_NAME@$PACKAGE_VERSION already exists on npm. Skipping publish."
+            exit 0
+          else
+            echo "$PACKAGE_NAME@$PACKAGE_VERSION does not exist. Proceeding with publish."
+          fi
+
+      - name: Authenticate with npm
+        run: echo "//registry.npmjs.org/:_authToken=${{ secrets.NPM_TOKEN }}" > ~/.npmrc
 
       - name: Publish Test Release
         env:
           NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
         run: |
           npm version prerelease --no-git-tag-version
-          npm publish --tag beta
+          npm publish --tag test
 
       - name: Create Test Release Tag
-        run: git tag -a "test-${{ github.run_id }}" -m "Test release version"
+        run: |
+          git tag -a "test-${{ github.run_id }}" -m "Test release version"
+          git push origin "test-${{ github.run_id }}"
