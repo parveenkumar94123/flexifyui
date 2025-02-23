@@ -39,6 +39,8 @@ jobs:
 
       - name: Bump version automatically
         run: |
+          git config --global user.name "parveenkumar94123"  # Make sure git user is configured
+          git config --global user.email "parveenkumar94123@gmail.com"
           npm version patch -m "chore(release): Bump version to %s"
           echo "NEW_VERSION=$(node -p "require('./package.json').version")" >> $GITHUB_ENV
 
@@ -52,11 +54,6 @@ jobs:
           else
             echo "Tag v${{ env.NEW_VERSION }} does not exist."
             echo "TAG_EXISTS=false" >> $GITHUB_ENV
-
-      - name: Configure Git user
-        run: |
-          git config --global user.name "parveenkumar94123"
-          git config --global user.email "parveenkumar94123@gmail.com"
 
       - name: Push updated package.json and tag
         run: |
