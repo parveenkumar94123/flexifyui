@@ -17,3 +17,6 @@ build/
 
 # Log files
 *.log
+
+# Ignore lock files
+package-lock.json
