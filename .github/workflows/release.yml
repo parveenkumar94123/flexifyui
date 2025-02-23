@@ -1,4 +1,4 @@
-name: Publish Stable Release
+name: Release
 
 on:
   push:
@@ -33,20 +33,35 @@ jobs:
         continue-on-error: true
         run: npm view flexifyui@$VERSION
 
-      - name: Bump version automatically (if version exists)
-        if: steps.check_version.outcome == 'success'  # Only bump if the version exists
+      - name: Unpublish existing version (if exists)
+        if: steps.check_version.outcome == 'success'
+        run: npm unpublish flexifyui@$VERSION --force
+
+      - name: Bump version automatically
         run: |
-          git config --global user.name "github-actions[bot]"
-          git config --global user.email "github-actions[bot]@users.noreply.github.com"
           npm version patch -m "chore(release): Bump version to %s"
           echo "NEW_VERSION=$(node -p "require('./package.json').version")" >> $GITHUB_ENV
 
-      - name: Commit version bump and tag
+      - name: Check if tag exists
+        id: check_tag
         run: |
+          git fetch --tags
+          if git rev-parse "v${{ env.NEW_VERSION }}" >/dev/null 2>&1; then
+            echo "Tag v${{ env.NEW_VERSION }} already exists. Skipping tag creation."
+            echo "TAG_EXISTS=true" >> $GITHUB_ENV
+          else
+            echo "Tag v${{ env.NEW_VERSION }} does not exist."
+            echo "TAG_EXISTS=false" >> $GITHUB_ENV
+
+      - name: Push updated package.json and tag
+        run: |
+          git config --global user.name "github-actions[bot]"
+          git config --global user.email "github-actions[bot]@users.noreply.github.com"
           git add package.json
-          # If there are no changes, force commit
           git commit -m "chore(release): Bump version to $NEW_VERSION" || echo "No changes to commit"
-          git tag v$NEW_VERSION
+          if [ "${{ env.TAG_EXISTS }}" == "false" ]; then
+            git tag v$NEW_VERSION
+          fi
           git push origin main --tags
 
       - name: Authenticate with npm
