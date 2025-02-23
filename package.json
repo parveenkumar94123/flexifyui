@@ -9,19 +9,31 @@
     "clean": "rm -rf dist",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
-  "keywords": [],
-  "author": "",
+  "keywords": [
+    "react",
+    "nextjs",
+    "ui",
+    "components",
+    "validation",
+    "typescript",
+    "form-validation",
+    "tailwindcss",
+    "design-system",
+    "flexifyui"
+  ],
+  "author": "Parveen Kumar",
   "license": "ISC",
   "type": "commonjs",
-  "description": "",
+  "description": "FlexifyUI is a flexible UI and validation library for Next.js and React, supporting TypeScript and TailwindCSS.",
   "peerDependencies": {
+    "next": ">=13.0.0",
     "react": ">=15.0.0",
-    "react-dom": ">=15.0.0",
-    "next": ">=13.0.0"
+    "react-dom": ">=15.0.0"
   },
   "dependencies": {
-    "react": "^19.0.0",
-    "react-dom": "^19.0.0"
+    "date-fns": "^4.1.0",
+    "react": ">=15.0.0",
+    "react-dom": ">=15.0.0"
   },
   "devDependencies": {
     "@types/node": "^22.12.0",
