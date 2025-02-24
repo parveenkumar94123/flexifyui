@@ -99,7 +99,6 @@ jobs:
           fi
 
       - name: Push updated package.json and tag
-        if: env.SKIP_BUMP != 'true'
         run: |
           git config --global user.name "github-actions[bot]"
           git config --global user.email "github-actions[bot]@users.noreply.github.com"
@@ -111,18 +110,15 @@ jobs:
           git push https://x-access-token:${{ secrets.GITHUB_TOKEN }}@github.com/parveenkumar94123/flexifyui.git main --tags
 
       - name: Authenticate with npm
-        if: env.SKIP_BUMP != 'true'
         run: echo "//registry.npmjs.org/:_authToken=${{ secrets.NPM_TOKEN }}" > ~/.npmrc
 
       - name: Publish to NPM (latest)
-        if: env.SKIP_BUMP != 'true'
         run: npm publish --access public
         env:
           NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
 
       # ✅ Create GitHub Release after successful NPM publish
       - name: Create GitHub Release
-        if: env.SKIP_BUMP != 'true'
         uses: softprops/action-gh-release@v1
         with:
           repository: "parveenkumar94123/flexifyui"
