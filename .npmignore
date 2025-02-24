@@ -11,7 +11,6 @@ tests/
 
 # Ignore source files
 src/
-dist/
 
 # Ignore license and readme if necessary (optional)
 README.md
