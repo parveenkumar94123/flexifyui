@@ -65,7 +65,8 @@ jobs:
           if [ "${{ env.TAG_EXISTS }}" == "false" ]; then
             git tag v$NEW_VERSION
           fi
-          git push https://x-access-token:${{ secrets.GITHUB_TOKEN }}@github.com/parveenkumar94123/flexifyui.git main --tags
+          git push
+          git push main --tags
       
       - name: Authenticate with npm
         run: echo "//registry.npmjs.org/:_authToken=${{ secrets.NPM_TOKEN }}" > ~/.npmrc
