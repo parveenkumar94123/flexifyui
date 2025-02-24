@@ -9,7 +9,7 @@ jobs:
   # 🚀 Step 1: Check & Update Version
   version_check:
     runs-on: ubuntu-latest
-    if: github.repository_owner == 'parveenkumar94123'  # ✅ Only run for your repository
+    if: github.repository_owner == 'parveenkumar94123'
     outputs:
       new_version: ${{ steps.get_version.outputs.VERSION }}
       tag_created: ${{ steps.tag_check.outputs.TAG_CREATED }}
@@ -17,7 +17,7 @@ jobs:
       - name: Checkout repository
         uses: actions/checkout@v3
         with:
-          fetch-depth: 0  # Ensure we fetch all tags
+          fetch-depth: 0
 
       - name: Set up Node.js
         uses: actions/setup-node@v3
@@ -64,8 +64,8 @@ jobs:
           git tag v$NEW_VERSION
           git push https://x-access-token:${{ secrets.GITHUB_TOKEN }}@github.com/parveenkumar94123/flexifyui.git main --tags
 
-  # 🚀 Step 2: Build & Release (Only if version updated)
-  build_and_release:
+  # 🚀 Step 2: Build Job (Only if version was updated)
+  build:
     needs: version_check
     if: github.repository_owner == 'parveenkumar94123' && needs.version_check.outputs.tag_created == 'true'
     runs-on: ubuntu-latest
@@ -73,7 +73,7 @@ jobs:
       - name: Checkout repository
         uses: actions/checkout@v3
         with:
-          fetch-depth: 0  # Ensure we fetch all tags
+          fetch-depth: 0
 
       - name: Set up Node.js
         uses: actions/setup-node@v3
@@ -85,7 +85,42 @@ jobs:
         run: npm install
 
       - name: Build the project
-        run: npm run build  # Change this if you have a different build script
+        run: npm run build
+
+      - name: Save build artifacts (dist, node_modules, package-lock.json)
+        uses: actions/upload-artifact@v3
+        with:
+          name: build-artifacts
+          path: |
+            dist
+            node_modules
+            package-lock.json
+
+  # 🚀 Step 3: Release Job (Runs only after successful build)
+  release:
+    needs: build
+    if: github.repository_owner == 'parveenkumar94123'
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v3
+        with:
+          fetch-depth: 0
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v3
+        with:
+          node-version: '18'
+          registry-url: 'https://registry.npmjs.org/'
+
+      - name: Download build artifacts
+        uses: actions/download-artifact@v3
+        with:
+          name: build-artifacts
+          path: ./
+
+      - name: Verify build contents
+        run: ls -R dist || echo "Build artifact not found!"
 
       - name: Verify package contents
         run: |
@@ -95,7 +130,7 @@ jobs:
       - name: Authenticate with npm
         run: echo "//registry.npmjs.org/:_authToken=${{ secrets.NPM_TOKEN }}" > ~/.npmrc
 
-      - name: Publish to NPM (latest)
+      - name: Publish to NPM
         run: npm publish --access public
         env:
           NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
