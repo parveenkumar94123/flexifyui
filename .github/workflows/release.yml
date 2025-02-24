@@ -27,12 +27,12 @@ jobs:
 
       - name: Get current package version
         id: get_version
-        run: echo "VERSION=$(node -p "require('./package.json').version")" >> $GITHUB_ENV
+        run: echo "VERSION=$(node -p "require('./package.json').version")" >> $GITHUB_OUTPUT
 
       - name: Check if version exists on npm
         id: check_version
         run: |
-          if npm view flexifyui@$VERSION > /dev/null 2>&1; then
+          if npm view flexifyui@${{ steps.get_version.outputs.VERSION }} > /dev/null 2>&1; then
             echo "VERSION_EXISTS=true" >> $GITHUB_ENV
           else
             echo "VERSION_EXISTS=false" >> $GITHUB_ENV
@@ -46,15 +46,18 @@ jobs:
           npm version patch -m "chore(release): Bump version to %s"
           echo "NEW_VERSION=$(node -p "require('./package.json').version")" >> $GITHUB_ENV
 
+      - name: Export new version output
+        id: export_version
+        run: echo "VERSION=${{ env.NEW_VERSION }}" >> $GITHUB_OUTPUT
+
       - name: Check if tag exists
         id: tag_check
         run: |
           git fetch --tags
           if git rev-parse "v${{ env.NEW_VERSION }}" >/dev/null 2>&1; then
-            echo "TAG_CREATED=false" >> $GITHUB_ENV
+            echo "TAG_CREATED=false" >> $GITHUB_OUTPUT
           else
-            echo "TAG_CREATED=true" >> $GITHUB_ENV
-          fi
+            echo "TAG_CREATED=true" >> $GITHUB_OUTPUT
 
       - name: Push updated version and tag
         if: env.TAG_CREATED == 'true'
