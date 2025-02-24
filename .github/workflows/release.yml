@@ -56,18 +56,22 @@ jobs:
             echo "TAG_EXISTS=false" >> $GITHUB_ENV
           fi  # Closing the if block properly
 
+      - name: Debug GitHub Token Permissions
+        run: |
+         echo "Testing GitHub Token Permissions..."
+         curl -H "Authorization: token ${{ secrets.GIT_TOKEN }}" https://api.github.com/user
+
       - name: Push updated package.json and tag
         run: |
-          git config --global user.name "parveenkumar94123"
-          git config --global user.email "parveenkumar94123@gmail.com"
+          git config --global user.name "github-actions[bot]"
+          git config --global user.email "github-actions[bot]@users.noreply.github.com"
           git add package.json
           git commit -m "chore(release): Bump version to $NEW_VERSION" || echo "No changes to commit"
           if [ "${{ env.TAG_EXISTS }}" == "false" ]; then
             git tag v$NEW_VERSION
           fi
-          git push
-          git push main --tags
-      
+          git push https://x-access-token:${{ secrets.GIT_TOKEN }}@github.com/parveenkumar94123/flexifyui.git main --tags
+
       - name: Authenticate with npm
         run: echo "//registry.npmjs.org/:_authToken=${{ secrets.NPM_TOKEN }}" > ~/.npmrc
 
