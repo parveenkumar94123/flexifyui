@@ -1,14 +1,19 @@
 {
   "name": "flexifyui-test",
-  "version": "1.0.7",
+  "version": "1.0.8",
   "main": "dist/index.js",
   "module": "dist/index.js",
   "types": "dist/index.d.ts",
   "files": [
-    "dist",
     "package.json",
     "README.md",
-    "LICENSE"
+    "LICENSE",
+    "dist/index.js",
+    "dist/index.d.ts",
+    "dist/validator/v.js",
+    "dist/validator/v.d.ts",
+    "dist/ui/index.js",
+    "dist/ui/index.d.ts"
   ],
   "exports": {
     ".": {
