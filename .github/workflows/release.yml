@@ -58,6 +58,7 @@ jobs:
             echo "TAG_CREATED=false" >> $GITHUB_OUTPUT
           else
             echo "TAG_CREATED=true" >> $GITHUB_OUTPUT
+          fi
 
       - name: Push updated version and tag
         if: env.TAG_CREATED == 'true'
