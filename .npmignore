@@ -1,9 +1,0 @@
-# Exclude everything by default
-*
-
-# Allow only necessary files
-!package.json
-!README.md
-!LICENSE
-!dist/
-!dist/**
