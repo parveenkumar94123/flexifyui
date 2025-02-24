@@ -1,20 +1,20 @@
 {
   "name": "flexifyui-test",
-  "version": "1.0.6",
+  "version": "1.0.7",
   "main": "dist/index.js",
   "module": "dist/index.js",
   "types": "dist/index.d.ts",
   "exports": {
     ".": {
-      "import": "./dist/index.js",
+      "default": "./dist/index.js",
       "types": "./dist/index.d.ts"
     },
     "./validator": {
-      "import": "./dist/validator/v.js",
+      "default": "./dist/validator/v.js",
       "types": "./dist/validator/v.d.ts"
     },
     "./ui": {
-      "import": "./dist/ui/index.js",
+      "default": "./dist/ui/index.js",
       "types": "./dist/ui/index.d.ts"
     }
   },
