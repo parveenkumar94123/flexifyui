@@ -1,4 +1,4 @@
-name: Release
+name: CI/CD Pipeline
 
 on:
   push:
@@ -6,8 +6,8 @@ on:
       - main
 
 jobs:
-  release:
-    if: github.repository_owner == 'parveenkumar94123'  # ✅ Only run for your repository
+  # 🚀 First Job: Build & Test
+  build:
     runs-on: ubuntu-latest
     steps:
       - name: Checkout repository
@@ -23,6 +23,42 @@ jobs:
 
       - name: Install dependencies
         run: npm install
+
+      - name: Build the project
+        run: npm run build  # Change this if you have a different build script
+
+      - name: Cache build artifacts
+        uses: actions/cache@v3
+        with:
+          path: |
+            node_modules
+            dist  # Assuming your build output is in "dist"
+          key: ${{ runner.os }}-build-${{ github.sha }}
+
+  # 🚀 Second Job: Release
+  release:
+    needs: build  # ✅ Only run release after build completes
+    if: github.repository_owner == 'parveenkumar94123'  # ✅ Only run for your repository
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v3
+        with:
+          fetch-depth: 0  # Ensure we fetch all tags
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v3
+        with:
+          node-version: '18'
+          registry-url: 'https://registry.npmjs.org/'
+
+      - name: Restore cached build artifacts
+        uses: actions/cache@v3
+        with:
+          path: |
+            node_modules
+            dist
+          key: ${{ runner.os }}-build-${{ github.sha }}
 
       - name: Get current version
         id: package
@@ -54,12 +90,7 @@ jobs:
           else
             echo "Tag v${{ env.NEW_VERSION }} does not exist."
             echo "TAG_EXISTS=false" >> $GITHUB_ENV
-          fi  # Closing the if block properly
-
-      - name: Debug GitHub Token Permissions
-        run: |
-         echo "Testing GitHub Token Permissions..."
-         curl -H "Authorization: token ${{ secrets.GIT_TOKEN }}" https://api.github.com/user
+          fi
 
       - name: Push updated package.json and tag
         run: |
@@ -70,7 +101,7 @@ jobs:
           if [ "${{ env.TAG_EXISTS }}" == "false" ]; then
             git tag v$NEW_VERSION
           fi
-          git push https://x-access-token:${{ secrets.GIT_TOKEN }}@github.com/parveenkumar94123/flexifyui.git main --tags
+          git push https://x-access-token:${{ secrets.GITHUB_TOKEN }}@github.com/parveenkumar94123/flexifyui.git main --tags
 
       - name: Authenticate with npm
         run: echo "//registry.npmjs.org/:_authToken=${{ secrets.NPM_TOKEN }}" > ~/.npmrc
@@ -91,4 +122,4 @@ jobs:
           draft: false
           prerelease: false
         env:
-          GITHUB_TOKEN: ${{ secrets.GIT_TOKEN }}  # ✅ Use your custom secret (GIT_TOKEN)
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
