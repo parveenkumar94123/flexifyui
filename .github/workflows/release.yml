@@ -6,13 +6,9 @@ on:
       - main
 
 jobs:
-  # 🚀 Step 1: Check & Update Version
-  version_check:
+  release:
     runs-on: ubuntu-latest
     if: github.repository_owner == 'parveenkumar94123'
-    outputs:
-      new_version: ${{ steps.export_version.outputs.NEW_VERSION }}
-      tag_created: ${{ steps.tag_check.outputs.TAG_CREATED }}
     steps:
       - name: Checkout repository
         uses: actions/checkout@v3
@@ -25,6 +21,7 @@ jobs:
           node-version: '18'
           registry-url: 'https://registry.npmjs.org/'
 
+      # 🚀 Step 1: Get Current Version & Check if Update Needed
       - name: Get current package version
         id: get_version
         run: echo "VERSION=$(node -p "require('./package.json').version")" >> $GITHUB_ENV
@@ -47,85 +44,40 @@ jobs:
           npm version patch -m "chore(release): Bump version to %s"
           echo "NEW_VERSION=$(node -p "require('./package.json').version")" >> $GITHUB_ENV
 
-      - name: Export new version output
-        id: export_version
-        run: echo "NEW_VERSION=${{ env.NEW_VERSION }}" >> $GITHUB_OUTPUT
+      - name: Use existing version if no update
+        if: env.VERSION_EXISTS == 'false'
+        run: echo "NEW_VERSION=${{ env.VERSION }}" >> $GITHUB_ENV
 
       - name: Check if tag exists
         id: tag_check
         run: |
           git fetch --tags
           if git rev-parse "v${{ env.NEW_VERSION }}" >/dev/null 2>&1; then
-            echo "TAG_CREATED=false" >> $GITHUB_OUTPUT
+            echo "TAG_EXISTS=true" >> $GITHUB_ENV
           else
-            echo "TAG_CREATED=true" >> $GITHUB_OUTPUT
+            echo "TAG_EXISTS=false" >> $GITHUB_ENV
           fi
 
-      - name: Push updated version and tag
-        if: env.NEW_VERSION != '' && steps.tag_check.outputs.TAG_CREATED == 'true'
+      # 🚀 Step 2: Push Updated Version & Tag (Only if New)
+      - name: Push updated version
+        if: env.VERSION_EXISTS == 'true'
         run: |
           git add package.json
           git commit -m "chore(release): Bump version to $NEW_VERSION" || echo "No changes to commit"
+          git push https://x-access-token:${{ secrets.GIT_TOKEN }}@github.com/parveenkumar94123/flexifyui.git main
+
+      - name: Push new tag
+        if: env.TAG_EXISTS == 'false'
+        run: |
           git tag v$NEW_VERSION
-          git push https://x-access-token:${{ secrets.GITHUB_TOKEN }}@github.com/parveenkumar94123/flexifyui.git main --tags
+          git push https://x-access-token:${{ secrets.GIT_TOKEN }}@github.com/parveenkumar94123/flexifyui.git main --tags
 
-  # 🚀 Step 2: Build Job (Only if version was updated)
-  build:
-    needs: version_check
-    if: github.repository_owner == 'parveenkumar94123' && needs.version_check.outputs.tag_created == 'true'
-    runs-on: ubuntu-latest
-    steps:
-      - name: Checkout repository
-        uses: actions/checkout@v3
-        with:
-          fetch-depth: 0
-
-      - name: Set up Node.js
-        uses: actions/setup-node@v3
-        with:
-          node-version: '18'
-          registry-url: 'https://registry.npmjs.org/'
-
+      # 🚀 Step 3: Build & Release
       - name: Install dependencies
         run: npm install
 
       - name: Build the project
         run: npm run build
-
-      - name: Save build artifacts (dist, node_modules, package-lock.json)
-        uses: actions/upload-artifact@v3
-        with:
-          name: build-artifacts
-          path: |
-            dist
-            node_modules
-            package-lock.json
-
-  # 🚀 Step 3: Release Job (Runs only after successful build)
-  release:
-    needs: build
-    if: github.repository_owner == 'parveenkumar94123'
-    runs-on: ubuntu-latest
-    steps:
-      - name: Checkout repository
-        uses: actions/checkout@v3
-        with:
-          fetch-depth: 0
-
-      - name: Set up Node.js
-        uses: actions/setup-node@v3
-        with:
-          node-version: '18'
-          registry-url: 'https://registry.npmjs.org/'
-
-      - name: Download build artifacts
-        uses: actions/download-artifact@v3
-        with:
-          name: build-artifacts
-          path: ./
-
-      - name: Verify build contents
-        run: ls -R dist || echo "Build artifact not found!"
 
       - name: Verify package contents
         run: |
@@ -141,13 +93,14 @@ jobs:
           NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
 
       - name: Create GitHub Release
+        if: env.TAG_EXISTS == 'false'
         uses: softprops/action-gh-release@v1
         with:
           repository: "parveenkumar94123/flexifyui"
-          tag_name: v${{ needs.version_check.outputs.new_version }}
-          name: Release v${{ needs.version_check.outputs.new_version }}
-          body: "Automated release for version ${{ needs.version_check.outputs.new_version }}"
+          tag_name: v${{ env.NEW_VERSION }}
+          name: Release v${{ env.NEW_VERSION }}
+          body: "Automated release for version ${{ env.NEW_VERSION }}"
           draft: false
           prerelease: false
         env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          GITHUB_TOKEN: ${{ secrets.GIT_TOKEN }}
