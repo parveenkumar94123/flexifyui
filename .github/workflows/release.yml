@@ -86,7 +86,6 @@ jobs:
           echo "NEW_VERSION=$(node -p "require('./package.json').version")" >> $GITHUB_ENV
 
       - name: Check if tag exists
-        if: env.SKIP_BUMP != 'true'
         id: check_tag
         run: |
           git fetch --tags
