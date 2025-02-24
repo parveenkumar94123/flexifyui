@@ -1,0 +1,22 @@
+# Ignore local environment files
+.idea/
+
+# Node.js
+node_modules/
+
+# TypeScript
+*.tsbuildinfo
+dist/
+build/
+
+# VSCode
+.vscode/
+
+# macOS
+.DS_Store
+
+# Log files
+*.log
+
+# Ignore lock files
+package-lock.json
