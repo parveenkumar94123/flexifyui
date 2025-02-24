@@ -1,0 +1,24 @@
+# GIT
+.git
+.github/
+.idea/
+.vscode/
+
+# Node Modules & Dependencies
+node_modules/
+*.lock
+
+# Source Code & Tests
+src/
+tests/
+examples/
+
+# Config Files
+tsconfig.json
+jest.config.js
+postcss.config.js
+tailwind.config.js
+.npmrc
+
+# System Files
+.DS_Store

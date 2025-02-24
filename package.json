@@ -1,31 +1,26 @@
 {
   "name": "flexifyui-test",
-  "version": "1.0.8",
+  "version": "1.0.9",
   "main": "dist/index.js",
   "module": "dist/index.js",
   "types": "dist/index.d.ts",
-  "files": [
-    "package.json",
-    "README.md",
-    "LICENSE",
-    "dist/index.js",
-    "dist/index.d.ts",
-    "dist/validator/v.js",
-    "dist/validator/v.d.ts",
-    "dist/ui/index.js",
-    "dist/ui/index.d.ts"
-  ],
   "exports": {
     ".": {
       "default": "./dist/index.js",
+      "import": "./dist/index.js",
+      "require": "./dist/index.js",
       "types": "./dist/index.d.ts"
     },
     "./validator": {
       "default": "./dist/validator/v.js",
+      "import": "./dist/validator/v.js",
+      "require": "./dist/validator/v.js",
       "types": "./dist/validator/v.d.ts"
     },
     "./ui": {
       "default": "./dist/ui/index.js",
+      "import": "./dist/ui/index.js",
+      "require": "./dist/ui/index.js",
       "types": "./dist/ui/index.d.ts"
     }
   },
@@ -56,6 +51,7 @@
   },
   "dependencies": {
     "date-fns": "^4.1.0",
+    "flexifyui-test": "file:flexifyui-test-1.0.8.tgz",
     "react": ">=15.0.0",
     "react-dom": ">=15.0.0"
   },
