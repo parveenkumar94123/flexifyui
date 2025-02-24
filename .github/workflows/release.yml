@@ -60,6 +60,14 @@ jobs:
             dist
           key: ${{ runner.os }}-build-${{ github.sha }}
 
+      - name: List all files before publishing
+        run: ls -R
+
+      - name: Verify package contents
+        run: |
+          npm pack
+          tar -tzf flexifyui-*.tgz | grep validator || (echo "❌ Validator not found in package!" && exit 1)
+
       - name: Get current version
         id: package
         run: echo "VERSION=$(node -p "require('./package.json').version")" >> $GITHUB_ENV
