@@ -1,0 +1,106 @@
+name: CI/CD Pipeline
+
+on:
+  push:
+    branches:
+      - main
+
+jobs:
+  release:
+    runs-on: ubuntu-latest
+    if: github.repository_owner == 'parveenkumar94123'
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v3
+        with:
+          fetch-depth: 0
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v3
+        with:
+          node-version: '18'
+          registry-url: 'https://registry.npmjs.org/'
+
+      # 🚀 Step 1: Get Current Version & Check if Update Needed
+      - name: Get current package version
+        id: get_version
+        run: echo "VERSION=$(node -p "require('./package.json').version")" >> $GITHUB_ENV
+
+      - name: Check if version exists on npm
+        id: check_version
+        run: |
+          if npm view flexifyui@${{ env.VERSION }} > /dev/null 2>&1; then
+            echo "VERSION_EXISTS=true" >> $GITHUB_ENV
+          else
+            echo "VERSION_EXISTS=false" >> $GITHUB_ENV
+          fi
+
+      - name: Bump version if it exists
+        id: bump_version
+        if: env.VERSION_EXISTS == 'true'
+        run: |
+          git config --global user.name "github-actions[bot]"
+          git config --global user.email "github-actions[bot]@users.noreply.github.com"
+          npm version patch -m "chore(release): Bump version to %s"
+          echo "NEW_VERSION=$(node -p "require('./package.json').version")" >> $GITHUB_ENV
+
+      - name: Use existing version if no update
+        if: env.VERSION_EXISTS == 'false'
+        run: echo "NEW_VERSION=${{ env.VERSION }}" >> $GITHUB_ENV
+
+      - name: Check if tag exists
+        id: tag_check
+        run: |
+          git fetch --tags
+          if git rev-parse "v${{ env.NEW_VERSION }}" >/dev/null 2>&1; then
+            echo "TAG_EXISTS=true" >> $GITHUB_ENV
+          else
+            echo "TAG_EXISTS=false" >> $GITHUB_ENV
+          fi
+
+      # 🚀 Step 2: Push Updated Version & Tag (Only if New)
+      - name: Push updated version
+        if: env.VERSION_EXISTS == 'true'
+        run: |
+          git add package.json
+          git commit -m "chore(release): Bump version to $NEW_VERSION" || echo "No changes to commit"
+          git push https://x-access-token:${{ secrets.GIT_TOKEN }}@github.com/parveenkumar94123/flexifyui.git main
+
+      - name: Push new tag
+        if: env.TAG_EXISTS == 'false'
+        run: |
+          git tag v$NEW_VERSION
+          git push https://x-access-token:${{ secrets.GIT_TOKEN }}@github.com/parveenkumar94123/flexifyui.git main --tags
+
+      # 🚀 Step 3: Build & Release
+      - name: Install dependencies
+        run: npm install
+
+      - name: Build the project
+        run: npm run build
+
+      - name: Verify package contents
+        run: |
+          npm pack
+          tar -tzf flexifyui-*.tgz | grep validator || (echo "❌ Validator not found in package!" && exit 1)
+
+      - name: Authenticate with npm
+        run: echo "//registry.npmjs.org/:_authToken=${{ secrets.NPM_TOKEN }}" > ~/.npmrc
+
+      - name: Publish to NPM
+        run: npm publish --access public
+        env:
+          NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
+
+      - name: Create GitHub Release
+        if: env.TAG_EXISTS == 'false'
+        uses: softprops/action-gh-release@v1
+        with:
+          repository: "parveenkumar94123/flexifyui"
+          tag_name: v${{ env.NEW_VERSION }}
+          name: Release v${{ env.NEW_VERSION }}
+          body: "Automated release for version ${{ env.NEW_VERSION }}"
+          draft: false
+          prerelease: false
+        env:
+          GITHUB_TOKEN: ${{ secrets.GIT_TOKEN }}
