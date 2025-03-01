@@ -1,19 +1,54 @@
-// Pagination.tsx
-import React from "react";
-interface PaginationProps {
+import { cn } from "@/utils/cn";
+import { FaChevronLeft, FaChevronRight } from "react-icons/fa";
+
+export interface PaginationProps {
     currentPage: number;
-    totalRecords: number;
-    limit: number;
-    onPageChange: (page: number) => void;
-}
-const Pagination: React.FC<PaginationProps> = ({ currentPage, totalRecords, limit, onPageChange }) => {
-    const totalPages = Math.ceil(totalRecords / limit);
-    return (
-        <div className="p-2 flex justify-between items-center border-t">
-            <button disabled={currentPage <= 1} onClick={() => onPageChange(currentPage - 1)}>&lt; Prev</button>
-            <span>Page {currentPage} of {totalPages}</span>
-            <button disabled={currentPage >= totalPages} onClick={() => onPageChange(currentPage + 1)}>Next &gt;</button>
-        </div>
-    );
-};
+    totalPage: number;
+    onChange: (page: number) => void;
+    totalRecords?: number;
+    fetchedRecords?: number;
+    className?: string;
+  }
+  
+const Pagination: React.FC<PaginationProps> = ({ 
+    currentPage, 
+    totalPage, 
+    onChange, 
+    totalRecords, 
+    fetchedRecords, 
+    className 
+}) => (
+    <div className={cn("flex items-center justify-between px-4 py-2 border-t mt-2", className)}>
+      {/* Total Records Display (only if both totalRecords and fetchedRecords exist) */}
+      {totalRecords !== undefined && fetchedRecords !== undefined && (
+        <span className="text-xs text-gray-500">
+          {fetchedRecords} / {totalRecords} showing
+        </span>
+      )}
+  
+      {/* Previous Button */}
+      <button 
+        className="p-2 rounded-full disabled:opacity-50 hover:bg-gray-200 transition" 
+        disabled={currentPage === 1} 
+        onClick={() => onChange(currentPage - 1)}
+      >
+        <FaChevronLeft className="text-gray-600" />
+      </button>
+  
+      {/* Page Info */}
+      <span className="text-sm text-gray-700 font-medium">
+        {currentPage} / {totalPage}
+      </span>
+  
+      {/* Next Button */}
+      <button 
+        className="p-2 rounded-full disabled:opacity-50 hover:bg-gray-200 transition" 
+        disabled={currentPage === totalPage} 
+        onClick={() => onChange(currentPage + 1)}
+      >
+        <FaChevronRight className="text-gray-600" />
+      </button>
+    </div>
+);
+
 export default Pagination;
